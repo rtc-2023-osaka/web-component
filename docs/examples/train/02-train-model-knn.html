@@ -1,0 +1,77 @@
+<html>
+
+<head>
+  <script src='../dist/pose-camera.js'></script>
+  <script src="./file-tools.js"></script>
+  <script>
+    let data = []
+
+    const upload = () => {
+      let fileElem = document.getElementById("file");
+      let labelElem = document.getElementById("label");
+      let reader = new FileReader();
+      reader.addEventListener("loadend", () => {
+        data = data.concat(fromCSV(reader.result).map(d => ({
+          ...d,
+          label: labelElem.value
+        })));
+        fileElem.value = ''
+        alert(`Data uploaded successfully and labeled "${labelElem.value}"`)
+      });
+      reader.readAsText(fileElem.files[0]);
+    }
+
+    const shuffle = arr => arr.map(
+      value => ({ value, sort: Math.random() })
+    ).sort(
+      (a, b) => a.sort - b.sort
+    ).map(
+      ({ value }) => value
+    );
+
+    const train = async () => {
+
+      const featureArray = Object.keys(data[0]).filter(v => v !== 'label')
+
+      const labelArray = data.map(row => row.label).filter((value, index, array) => array.indexOf(value) === index)
+
+      const processedData = shuffle(data);
+
+      const train_dataset = processedData.map(row => featureArray.map(feature => row[feature]));
+
+      const train_labels = processedData.map(row => labelArray.findIndex(value => value === row.label));
+      const model = new KNN(train_dataset, train_labels, { k: 3 });
+
+      const filename = prompt("Please enter filename", 'model.json');
+      if (filename) {
+
+        const modelJson = model.toJSON()
+
+        /* Store the sequence of features and class names in the model */
+        modelJson.featureArray = featureArray
+        modelJson.labelArray = labelArray
+
+        downloadFile(filename, 'json', JSON.stringify(modelJson))
+      }
+    }
+
+  </script>
+  <style>
+    body>* {
+      display: block;
+      margin: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+
+  <input type="file" id="file">
+  <label for="label">Label:</label><input type="text" name="label" id="label">
+  <button onclick="upload()">Upload</button>
+  <button onclick="train()">Train</button>
+
+</body>
+
+</html>

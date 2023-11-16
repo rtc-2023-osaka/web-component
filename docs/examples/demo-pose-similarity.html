@@ -1,0 +1,48 @@
+<html>
+
+<head>
+  <script src="dist/pose-camera.js"></script>
+  <style>
+    rtc-canvas-pose-detection {
+      display: grid;
+      width: 100%;
+    }
+
+    rtc-camera-pose-capture {
+      display: grid;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <rtc-canvas-pose-detection id='pose' src='../demo/lightning-bolt-pose.jpg'></rtc-canvas-pose-detection>
+  <rtc-camera-pose-capture id="camera" sample-rate="40">
+  </rtc-camera-pose-capture>
+  <button type="button" onclick="(() => {
+    this.disabled = true
+    setTimeout((() => {
+      this.disabled = false
+      const cameraPose = document.getElementById('camera').capture()
+      const imagePose =  document.getElementById('pose').pose
+      console.log(`Pose Similarity = ${poseSimilarity(cameraPose, imagePose)}`)
+      alert('Captured!')
+    }).bind(this), 5000)
+  })(this)">Capture</button>
+
+  <button type="button" onclick="(() => {
+    document.getElementById('camera').play()
+  })(this)">Resume</button>
+  <div id="debug">
+  </div>
+  <!-- <script>
+    let camera = document.getElementById("camera")
+    setTimeout(() => {
+      camera.handler = () => console.log("Updated handler")
+    }, 5000)
+
+
+  </script> -->
+</body>
+
+</html>

@@ -1,0 +1,40 @@
+<html>
+
+<head>
+  <script src="dist/pose-camera.js"></script>
+  <style>
+    rtc-camera-pose-capture-similarity {
+      display: grid;
+      width: calc(100vw - 16px);
+      height: calc(100vh - 16px);
+    }
+  </style>
+</head>
+
+
+<body>
+  <rtc-camera-pose-capture-similarity id="camera" sample-rate="40" src='../demo/lightning-bolt-pose.jpg'>
+  </rtc-camera-pose-capture-similarity>
+  <button type="button" onclick="(() => {
+    this.disabled = true
+    setTimeout((() => {
+      this.disabled = false
+      console.log(document.getElementById('camera').capture())
+      alert('Captured!')
+    }).bind(this), 5000)
+  })(this)">Capture</button>
+  <button type="button" onclick="(() => {
+    document.getElementById('camera').play()
+  })(this)">Resume</button>
+  <div id="debug">
+  </div>
+  <script>
+    let camera = document.getElementById("camera")
+    setTimeout(() => {
+      camera.handler = () => console.log("Updated handler")
+    }, 5000)
+
+  </script>
+</body>
+
+</html>

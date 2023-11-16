@@ -1,0 +1,87 @@
+<html>
+
+<head>
+  <script src="../dist/pose-camera.js"></script>
+  <script src="./file-tools.js"></script>
+  <script>
+    function startCapture() {
+      let currentSamples = 0
+      this.disabled = true
+
+      let samples = []
+      const interval = setInterval((() => {
+        const overlay = document.getElementById('overlay')
+        overlay.style.backgroundColor = '#000';
+        const camera = document.getElementById('camera')
+        const pose = camera.capture()
+
+        currentSamples++
+        overlay.innerHTML = `<span>${currentSamples}</span>`
+        console.log(`Capturing sample ${currentSamples}`)
+
+        samples.push(poseUtilities.poseToFeatures(pose))
+
+        setTimeout(() => {
+          document.getElementById('overlay').style.backgroundColor = 'transparent';
+          overlay.innerHTML = ""
+        }, 250)
+
+        camera.play()
+        if (currentSamples >= Number(document.getElementById('samples').value)) {
+          setTimeout((() => {
+            clearInterval(interval)
+            this.disabled = false
+
+            const filename = prompt("Please enter filename", 'samples.csv');
+            if (filename) {
+              downloadFile(filename, 'csv', toCSV(samples));
+            }
+          }).bind(this), 500)
+        }
+      }).bind(this), 1000 * Number(document.getElementById('interval').value))
+    }
+  </script>
+  <style>
+    rtc-camera-pose-capture {
+      display: grid;
+      width: calc(100vw - 16px);
+      height: calc(100vh - 16px);
+    }
+
+    #overlay {
+      position: absolute;
+      display: grid;
+      width: calc(100vw - 16px);
+      height: calc(100vh - 16px);
+
+      color: #fff;
+      font-size: 30em;
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+
+
+<body>
+  <p><input id="samples" type="number" value="3"></input> Samples</p>
+  <p><input id="interval" type="number" value="1"></input> Interval</p>
+  <div>
+    <div id="overlay"></div>
+    <rtc-camera-pose-capture id="camera" sample-rate="40">
+  </div>
+  </rtc-camera-pose-capture>
+  <button type="button" onclick="(() => {
+    this.disabled = true
+    setTimeout((() => {
+      startCapture.bind(this)()
+    }).bind(this), 10000)
+  })(this)">Capture</button>
+  <button type="button" onclick="(() => {
+    document.getElementById('camera').play()
+  })(this)">Resume</button>
+</body>
+
+</html>
